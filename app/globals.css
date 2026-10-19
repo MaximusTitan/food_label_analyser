@@ -1,26 +1,110 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #f4f8f3;
+  --surface: #ffffff;
+  --surface-2: #eef4ee;
+  --ink: #17251c;
+  --ink-muted: #56685c;
+  --line: #d5e1d8;
+  --brand: #1e8f4e;
+  --brand-strong: #17733e;
+  --brand-ink: #ffffff;
+  --brand-soft: #dcf3e3;
+  --good: #2b9c55;
+  --good-soft: #dbf3e2;
+  --good-ink: #155230;
+  --moderate: #e9a919;
+  --moderate-soft: #fff1c9;
+  --moderate-ink: #644400;
+  --avoid: #dc3d43;
+  --avoid-soft: #fde1df;
+  --avoid-ink: #7c1b1e;
+  --focus: #1e6fd9;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0f1612;
+    --surface: #17211b;
+    --surface-2: #1e2b23;
+    --ink: #e7f0ea;
+    --ink-muted: #9db0a3;
+    --line: #2d3d33;
+    --brand: #3cb46c;
+    --brand-strong: #52c87f;
+    --brand-ink: #08130c;
+    --brand-soft: #1b3a27;
+    --good: #45bf72;
+    --good-soft: #193726;
+    --good-ink: #a9ebc0;
+    --moderate: #f0b93a;
+    --moderate-soft: #3a2f12;
+    --moderate-ink: #fbe0a0;
+    --avoid: #f0646a;
+    --avoid-soft: #3d1c1d;
+    --avoid-ink: #ffc2c0;
+    --focus: #6aa8ff;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-good-ink: var(--good-ink);
+  --color-moderate: var(--moderate);
+  --color-moderate-soft: var(--moderate-soft);
+  --color-moderate-ink: var(--moderate-ink);
+  --color-avoid: var(--avoid);
+  --color-avoid-soft: var(--avoid-soft);
+  --color-avoid-ink: var(--avoid-ink);
+  --font-sans: var(--font-nunito), var(--font-baloo), system-ui, sans-serif;
+  --font-display: var(--font-baloo), var(--font-nunito), system-ui, sans-serif;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@keyframes scan-line {
+  0%,
+  100% {
+    top: 12%;
+  }
+  50% {
+    top: 82%;
+  }
+}
+
+.scan-line {
+  animation: scan-line 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-line {
+    animation: none;
+    top: 45%;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
 }
