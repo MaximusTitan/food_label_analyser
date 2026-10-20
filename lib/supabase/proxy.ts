@@ -5,6 +5,8 @@ import { supabaseEnv } from "./env";
 
 /** Pages anyone can open. Everything else needs a signed-in user. */
 export const AUTH_PAGES = ["/login", "/signup"];
+/** The email confirmation link lands here, signed in or not. */
+const OPEN_PATHS = ["/auth/confirm"];
 
 function isAuthPage(pathname: string) {
   return AUTH_PAGES.includes(pathname);
@@ -37,7 +39,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   const { pathname } = request.nextUrl;
 
   // The API answers 401 itself rather than redirecting.
-  if (pathname.startsWith("/api/")) return response;
+  if (pathname.startsWith("/api/") || OPEN_PATHS.includes(pathname)) return response;
 
   let target: string | null = null;
   if (!signedIn && !isAuthPage(pathname)) target = "/login";

@@ -16,9 +16,16 @@ pnpm dev
 
 Open http://localhost:3000, sign up, and scan a label. The four "Try an example" products work without a gateway key (you still need to be signed in).
 
-### Sign-up without email confirmation
+### Email verification on sign-up
 
-Accounts are created on the server with the Supabase admin API and `email_confirm: true`, so users are signed in straight away and no confirmation email is sent, whatever the project's "Confirm email" setting. This needs `SUPABASE_SECRET_KEY`. If you'd rather not use the secret key, switch off **Authentication → Sign In / Providers → Email → Confirm email** in the Supabase dashboard and change `signup` in `lib/server/auth-actions.ts` to call `supabase.auth.signUp`.
+Sign-up calls `supabase.auth.signUp`, which emails a confirmation link. The link lands on `/auth/confirm`, which confirms the address, signs the user in and goes home. Until then, logging in shows "Please confirm your email first" with a button to send the link again.
+
+In the Supabase dashboard:
+
+1. **Authentication → Sign In / Providers → Email → Confirm email** must be on (the default). If it's off, users are signed in straight away.
+2. **Authentication → URL Configuration**: set **Site URL** to your deployed URL and add `http://localhost:3000/auth/confirm` and `https://<your-domain>/auth/confirm` to **Redirect URLs**.
+3. Optional, so the link works on a different device or browser from the one used to sign up: in **Authentication → Emails → Confirm signup**, change the link to `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`. The default template also works, but only in the same browser.
+4. Supabase's built-in email service sends only **2 emails per hour** per project and only to members of your Supabase organization. For real users, set up custom SMTP under **Project Settings → Authentication → SMTP** (for example Resend, Postmark or SES) and raise the limit under **Authentication → Rate Limits**.
 
 | Script | What it does |
 | --- | --- |
@@ -37,9 +44,9 @@ Accounts are created on the server with the Supabase admin API and `email_confir
 ### Security notes
 
 - Every page except `/login` and `/signup` needs a session. `proxy.ts` refreshes the Supabase session and redirects optimistically; pages, Server Actions and the API verify the user again on the server (`lib/server/auth.ts`).
-- Database access uses the publishable key with the user's session, so Row Level Security limits every query to the user's own rows. The secret key is only used to create pre-confirmed accounts.
-- `AI_GATEWAY_API_KEY` and `SUPABASE_SECRET_KEY` are read only on the server (modules import `server-only`).
-- Login shows the same message for an unknown email and a wrong password. Login (10 per 5 min) and sign-up (5 per 15 min) are rate-limited per IP; analysis is rate-limited per user (10/min).
+- Database access uses the publishable key with the user's session, so Row Level Security limits every query to the user's own rows. The secret key isn't needed.
+- `AI_GATEWAY_API_KEY` is read only on the server (modules import `server-only`).
+- Login shows the same message for an unknown email and a wrong password. Login (10 per 5 min), sign-up (5 per 15 min) and resending the confirmation email (3 per 15 min) are rate-limited per IP; analysis is rate-limited per user (10/min).
 - Uploads are capped at 5 MB and identified by magic bytes (JPEG, PNG, WebP), not by the declared MIME type.
 - The analyze route rejects cross-site requests. Rate limits are in memory per server instance; use a shared store such as Redis if you run several instances.
 - Label content is treated as data in the prompt; model output is schema-validated and bounded before use.

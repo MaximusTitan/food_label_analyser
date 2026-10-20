@@ -57,6 +57,12 @@ describe("updateSession", () => {
     expect((await updateSession(request("/history"))).headers.get("location")).toBeNull();
   });
 
+  it("lets anyone open the email confirmation link", async () => {
+    expect((await updateSession(request("/auth/confirm?code=abc"))).headers.get("location")).toBeNull();
+    mocks.claims = { sub: "u1" };
+    expect((await updateSession(request("/auth/confirm?code=abc"))).headers.get("location")).toBeNull();
+  });
+
   it("never redirects API calls", async () => {
     expect((await updateSession(request("/api/analyze"))).headers.get("location")).toBeNull();
   });

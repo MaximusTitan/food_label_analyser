@@ -7,10 +7,11 @@ import {
   INITIAL_AUTH_STATE,
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
+  type AuthErrorCode,
   type AuthFormState,
 } from "@/lib/auth-form";
 import { useI18n } from "@/lib/i18n/LocaleProvider";
-import { login, signup } from "@/lib/server/auth-actions";
+import { login, resendConfirmation, signup } from "@/lib/server/auth-actions";
 import { AlertIcon } from "../icons";
 
 type Mode = "login" | "signup";
@@ -20,11 +21,44 @@ const ACTIONS: Record<Mode, (prev: AuthFormState, data: FormData) => Promise<Aut
   signup,
 };
 
-export function AuthForm({ mode }: { mode: Mode }) {
+export function AuthForm({ mode, initialError = null }: { mode: Mode; initialError?: AuthErrorCode | null }) {
   const { t } = useI18n();
-  const [state, formAction, pending] = useActionState(ACTIONS[mode], INITIAL_AUTH_STATE);
+  const [state, formAction, pending] = useActionState(ACTIONS[mode], { ...INITIAL_AUTH_STATE, error: initialError });
+  const [resendState, resendAction, resendPending] = useActionState(resendConfirmation, INITIAL_AUTH_STATE);
   const [showPassword, setShowPassword] = useState(false);
   const isSignup = mode === "signup";
+
+  if (state.notice === "check_email" || resendState.notice === "resent") {
+    const email = resendState.email || state.email;
+    return (
+      <div className="mx-auto w-full max-w-md py-6 text-center">
+        <p className="text-5xl" aria-hidden="true">
+          📬
+        </p>
+        <h1 className="mt-2 font-display text-3xl font-bold">{t("auth.checkEmailTitle")}</h1>
+        <div className="mt-6 space-y-4 rounded-3xl border-2 border-line bg-surface p-6">
+          <p role="status">{t("auth.checkEmailBody", { email })}</p>
+          <p className="text-sm text-ink-muted">{t("auth.checkEmailHint")}</p>
+          {resendState.error && (
+            <p role="alert" className="text-sm text-avoid-ink">
+              {t(`auth.error.${resendState.error}`)}
+            </p>
+          )}
+          {resendState.notice === "resent" && !resendPending && (
+            <p className="text-sm font-semibold text-ink-muted">{t("auth.resent")}</p>
+          )}
+          <ResendButton email={email} action={resendAction} pending={resendPending} />
+        </div>
+        <p className="mt-4">
+          <Link href="/login" className="font-bold text-brand hover:underline">
+            {t("auth.backToLogin")}
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
+  const resendError = resendState.error ?? null;
 
   return (
     <div className="mx-auto w-full max-w-md py-6">
@@ -104,6 +138,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </button>
       </form>
 
+      {state.error === "email_not_confirmed" && (
+        <div className="mt-4 space-y-2 text-center">
+          {resendError && (
+            <p role="alert" className="text-sm text-avoid-ink">
+              {t(`auth.error.${resendError}`)}
+            </p>
+          )}
+          <ResendButton email={state.email} action={resendAction} pending={resendPending} />
+        </div>
+      )}
+
       <p className="mt-4 text-center text-ink-muted">
         {t(isSignup ? "auth.haveAccount" : "auth.noAccount")}{" "}
         <Link href={isSignup ? "/login" : "/signup"} className="font-bold text-brand hover:underline">
@@ -111,5 +156,29 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </Link>
       </p>
     </div>
+  );
+}
+
+function ResendButton({
+  email,
+  action,
+  pending,
+}: {
+  email: string;
+  action: (data: FormData) => void;
+  pending: boolean;
+}) {
+  const { t } = useI18n();
+  return (
+    <form action={action}>
+      <input type="hidden" name="email" value={email} />
+      <button
+        type="submit"
+        disabled={pending}
+        className="rounded-2xl border-2 border-line px-5 py-2 font-semibold text-ink transition-colors hover:bg-surface-2 disabled:cursor-wait disabled:opacity-60"
+      >
+        {pending ? t("auth.pending") : t("auth.resendButton")}
+      </button>
+    </form>
   );
 }

@@ -17,13 +17,23 @@ export const AUTH_ERROR_CODES = [
   "rate_limited",
   "signup_failed",
   "not_configured",
+  "email_not_confirmed",
+  "link_invalid",
 ] as const;
 export type AuthErrorCode = (typeof AUTH_ERROR_CODES)[number];
+
+export function isAuthErrorCode(value: unknown): value is AuthErrorCode {
+  return AUTH_ERROR_CODES.includes(value as AuthErrorCode);
+}
+
+/** "check_email" after sign-up, "resent" after asking for the link again. */
+export type AuthNotice = "check_email" | "resent";
 
 export interface AuthFormState {
   error: AuthErrorCode | null;
   /** Echoed back so the field keeps its value after a failed attempt. */
   email: string;
+  notice?: AuthNotice;
 }
 
 export const INITIAL_AUTH_STATE: AuthFormState = { error: null, email: "" };
