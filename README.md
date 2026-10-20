@@ -1,6 +1,6 @@
-# Snack Check — Food Label Analyser
+# Food Label Buddy
 
-Snap or upload a photo of a packaged-food label (or type the ingredients) and Snack Check explains what's inside in simple words: a 1–10 health score, traffic-light nutrition facts, allergen alerts, an ingredient-by-ingredient breakdown, how often to eat it, and healthier swaps. Users sign up with email and password, their scans are saved to their account in Supabase, and any two can be compared side by side. The UI is available in English and Hindi.
+Snap or upload a photo of a packaged-food label (or type the ingredients) and Food Label Buddy explains what's inside in simple words: a 1–10 health score, traffic-light nutrition facts, allergen alerts, an ingredient-by-ingredient breakdown, how often to eat it, and healthier swaps. Users sign up with email and password, their scans are saved to their account in Supabase, and any two can be compared side by side. The UI is available in English and Hindi.
 
 ## Getting started
 

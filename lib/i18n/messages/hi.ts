@@ -1,14 +1,14 @@
 import type { MessageKey } from "./en";
 
 export const hi: Record<MessageKey, string> = {
-  "app.name": "स्नैक चेक",
+  "app.name": "फ़ूड लेबल बडी",
   "app.description": "फ़ूड लेबल की फ़ोटो लें और आसान शब्दों में जानें कि अंदर असल में क्या है।",
   "nav.myScans": "मेरे स्कैन",
   "nav.language": "भाषा",
   "lang.en": "English",
   "lang.hi": "हिन्दी",
 
-  "home.title": "चलो, अपना स्नैक जाँचें!",
+  "home.title": "चलो, साथ मिलकर फ़ूड लेबल पढ़ें!",
   "home.subtitle": "फ़ूड लेबल की फ़ोटो लें, हम आसान शब्दों में बताएँगे कि अंदर क्या है।",
   "home.privacy":
     "फ़ोटो सिर्फ़ लेबल पढ़ने के लिए हमारे AI को भेजी जाती है और रखी नहीं जाती। आपके नतीजे आपके खाते में सेव होते हैं।",
@@ -71,7 +71,7 @@ export const hi: Record<MessageKey, string> = {
   "report.howToEnjoy": "कैसे खाएँ",
   "report.notFound": "यह स्कैन नहीं मिला।",
   "report.notFoundHint": "हो सकता है इसे हटा दिया गया हो, या यह किसी दूसरे खाते का हो।",
-  "report.scanAnother": "दूसरा स्नैक स्कैन करें",
+  "report.scanAnother": "दूसरा लेबल स्कैन करें",
   "report.disclaimer": "यह सिर्फ़ सामान्य जानकारी है, डॉक्टरी सलाह नहीं।",
   "report.benefits": "अच्छी बातें",
   "report.risks": "ध्यान दें",
@@ -149,9 +149,9 @@ export const hi: Record<MessageKey, string> = {
   "enjoy.swapsNone": "यह पहले से ही अच्छा विकल्प है।",
 
   "auth.loginTitle": "फिर से स्वागत है!",
-  "auth.loginSubtitle": "स्नैक जाँचने और अपने स्कैन देखने के लिए लॉग इन करें।",
+  "auth.loginSubtitle": "फ़ूड लेबल जाँचने और अपने स्कैन देखने के लिए लॉग इन करें।",
   "auth.signupTitle": "अपना खाता बनाएँ",
-  "auth.signupSubtitle": "हर जाँचा गया स्नैक सेव करें और बाद में तुलना करें।",
+  "auth.signupSubtitle": "हर जाँचा गया लेबल सेव करें और बाद में तुलना करें।",
   "auth.email": "ईमेल",
   "auth.password": "पासवर्ड",
   "auth.passwordHint": "कम से कम {min} अक्षर।",
@@ -184,7 +184,7 @@ export const hi: Record<MessageKey, string> = {
   "history.title": "मेरे स्कैन",
   "history.tickTwo": "तुलना के लिए दो चुनें",
   "history.empty": "अभी कोई स्कैन नहीं है।",
-  "history.emptyCta": "अपना पहला स्नैक स्कैन करें",
+  "history.emptyCta": "अपना पहला लेबल स्कैन करें",
   "history.select": "{name} की तुलना करें",
   "history.remove": "{name} हटाएँ",
   "history.compareTitle": "आमने-सामने",

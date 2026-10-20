@@ -16,12 +16,12 @@ export function AppHeader({ account }: { account: ReactNode }) {
       <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3 sm:px-6">
         <Link
           href="/"
-          className="flex items-center gap-2 font-display text-xl font-bold text-brand"
+          className="flex min-w-0 items-center gap-2 font-display text-lg leading-tight font-bold text-brand sm:text-xl"
         >
-          <SearchIcon className="text-2xl" />
+          <SearchIcon className="hidden shrink-0 text-2xl sm:block" />
           {t("app.name")}
         </Link>
-        <nav className="ml-auto flex items-center gap-2 text-sm">
+        <nav className="ml-auto flex shrink-0 items-center gap-1 whitespace-nowrap text-sm sm:gap-2">
           {account}
           <label className="sr-only" htmlFor="language">
             {t("nav.language")}
