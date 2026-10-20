@@ -63,13 +63,19 @@ describe("updateSession", () => {
     expect((await updateSession(request("/auth/confirm?code=abc"))).headers.get("location")).toBeNull();
   });
 
+  it("lets anyone open the landing page", async () => {
+    expect((await updateSession(request("/"))).headers.get("location")).toBeNull();
+    mocks.claims = { sub: "u1" };
+    expect((await updateSession(request("/"))).headers.get("location")).toBeNull();
+  });
+
   it("never redirects API calls", async () => {
     expect((await updateSession(request("/api/analyze"))).headers.get("location")).toBeNull();
   });
 
   it("keeps refreshed session cookies on redirects", async () => {
     mocks.refresh = true;
-    const res = await updateSession(request("/"));
+    const res = await updateSession(request("/history"));
     expect(res.headers.get("location")).toBe("http://localhost:3000/login");
     expect(res.cookies.get("sb-token")?.value).toBe("fresh");
     expect(res.headers.get("cache-control")).toBe("private, no-store");

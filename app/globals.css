@@ -21,6 +21,10 @@
   --avoid-soft: #fde1df;
   --avoid-ink: #7c1b1e;
   --focus: #1e6fd9;
+  /* Logo colours: wordmark navy and tag orange. */
+  --logo-ink: #1e1f3c;
+  --accent: #f05a25;
+  --accent-soft: #fde6dc;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,6 +49,9 @@
     --avoid-soft: #3d1c1d;
     --avoid-ink: #ffc2c0;
     --focus: #6aa8ff;
+    --logo-ink: #eef0ff;
+    --accent: #ff7a45;
+    --accent-soft: #3b2117;
   }
 }
 
@@ -68,6 +75,9 @@
   --color-avoid: var(--avoid);
   --color-avoid-soft: var(--avoid-soft);
   --color-avoid-ink: var(--avoid-ink);
+  --color-logo-ink: var(--logo-ink);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --font-sans: var(--font-nunito), var(--font-baloo), system-ui, sans-serif;
   --font-display: var(--font-baloo), var(--font-nunito), system-ui, sans-serif;
 }
@@ -97,7 +107,24 @@ body {
   animation: scan-line 2.4s ease-in-out infinite;
 }
 
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .float {
+    animation: none;
+  }
   .scan-line {
     animation: none;
     top: 45%;

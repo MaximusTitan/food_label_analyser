@@ -5,8 +5,11 @@ import { supabaseEnv } from "./env";
 
 /** Pages anyone can open. Everything else needs a signed-in user. */
 export const AUTH_PAGES = ["/login", "/signup"];
-/** The email confirmation link lands here, signed in or not. */
-const OPEN_PATHS = ["/auth/confirm"];
+/**
+ * Open to everyone, signed in or not: the landing page (which becomes the
+ * scanner once signed in) and the email confirmation link.
+ */
+const OPEN_PATHS = ["/", "/auth/confirm"];
 
 function isAuthPage(pathname: string) {
   return AUTH_PAGES.includes(pathname);
