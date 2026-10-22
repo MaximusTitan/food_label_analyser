@@ -4,7 +4,7 @@ Snap or upload a photo of a packaged-food label (or type the ingredients) and Fo
 
 ## Getting started
 
-1. Create a Supabase project and run the migration in `supabase/migrations/` (SQL editor, or `supabase db push` with the Supabase CLI). It creates the `scans` table with Row Level Security.
+1. Create a Supabase project and run the migrations in `supabase/migrations/` in order (SQL editor, or `supabase db push` with the Supabase CLI). They create the `scans` table and the private `scan-photos` Storage bucket, each with Row Level Security.
 2. Create a Vercel AI Gateway API key.
 3. Configure and start the app:
 

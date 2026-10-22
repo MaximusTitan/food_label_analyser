@@ -53,7 +53,15 @@ export async function POST(request: Request) {
 
   try {
     const extraction = await analyzeLabel(parsed.input, isLocale(locale) ? locale : DEFAULT_LOCALE);
-    const id = await insertScan(extraction, parsed.input.kind === "image" ? "photo" : "text");
+    const { input } = parsed;
+    const id =
+      input.kind === "image"
+        ? await insertScan(extraction, "photo", {
+            userId: user.id,
+            mediaType: input.mediaType,
+            base64: input.base64,
+          })
+        : await insertScan(extraction, "text");
     return Response.json({ id });
   } catch (error) {
     if (error instanceof AnalyzeFailure) return fail(error.code, STATUS[error.code]);

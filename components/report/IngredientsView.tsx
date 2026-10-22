@@ -26,6 +26,7 @@ function Ingredients({ scan }: ReportData) {
   const { t } = useI18n();
   const [filter, setFilter] = useState<Filter>("all");
   const { ingredients } = scan.extraction;
+  const hasIngredients = ingredients.length > 0;
   const shown =
     filter === "all" ? ingredients : ingredients.filter((i) => i.tags.includes(filter as IngredientTag));
 
@@ -37,29 +38,41 @@ function Ingredients({ scan }: ReportData) {
             {t("ingredients.title")} <SearchIcon className="text-brand" />
           </h1>
           <p className="text-sm text-ink-muted">
-            {scan.extraction.productName} · {t("ingredients.orderHint")}
+            {scan.extraction.productName}
+            {hasIngredients && ` · ${t("ingredients.orderHint")}`}
           </p>
         </div>
-        <div role="group" aria-label={t("ingredients.title")} className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              type="button"
-              aria-pressed={filter === f}
-              onClick={() => setFilter(f)}
-              className={`rounded-full border-2 px-4 py-1.5 text-sm font-semibold transition-colors ${
-                filter === f ? "border-brand bg-brand-soft text-ink" : "border-line bg-surface text-ink-muted hover:border-brand"
-              }`}
-            >
-              {FILTER_EMOJI[f] && <span aria-hidden="true">{FILTER_EMOJI[f]} </span>}
-              {t(`filter.${f}`)}
-            </button>
-          ))}
-        </div>
+        {hasIngredients && (
+          <div role="group" aria-label={t("ingredients.title")} className="flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                aria-pressed={filter === f}
+                onClick={() => setFilter(f)}
+                className={`rounded-full border-2 px-4 py-1.5 text-sm font-semibold transition-colors ${
+                  filter === f ? "border-brand bg-brand-soft text-ink" : "border-line bg-surface text-ink-muted hover:border-brand"
+                }`}
+              >
+                {FILTER_EMOJI[f] && <span aria-hidden="true">{FILTER_EMOJI[f]} </span>}
+                {t(`filter.${f}`)}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {ingredients.length === 0 ? (
-        <p className="rounded-2xl bg-surface p-6 text-center text-ink-muted">{t("ingredients.none")}</p>
+      {!hasIngredients ? (
+        <div className="space-y-3 rounded-2xl bg-surface p-6 text-center">
+          <p className="font-display text-lg font-semibold">{t("ingredients.none")}</p>
+          <p className="mx-auto max-w-prose text-ink-muted">{t("ingredients.noneHint")}</p>
+          <Link
+            href="/"
+            className="inline-block rounded-full border-2 border-brand px-5 py-2 font-bold text-brand hover:bg-brand-soft"
+          >
+            {t("ingredients.scanList")}
+          </Link>
+        </div>
       ) : shown.length === 0 ? (
         <p className="rounded-2xl bg-surface p-6 text-center text-ink-muted">{t("ingredients.empty")}</p>
       ) : (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
 
 import {
   AnalyzeRequestError,
@@ -37,7 +37,17 @@ export function HomeScreen() {
     return () => URL.revokeObjectURL(previewUrl);
   }, [previewUrl]);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  // With cacheComponents this page is hidden by <Activity> instead of unmounted,
+  // so state survives navigation. Reset when hidden so returning home doesn't
+  // show the last scan as still processing.
+  useLayoutEffect(
+    () => () => {
+      abortRef.current?.abort();
+      abortRef.current = null;
+      setState({ status: "idle" });
+    },
+    [],
+  );
 
   async function run(pending: Pending, input: () => Promise<{ image: Blob } | { text: string }>) {
     abortRef.current?.abort();

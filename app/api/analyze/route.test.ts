@@ -52,6 +52,22 @@ describe("POST /api/analyze", () => {
     expect(insertScan).toHaveBeenCalledWith(extraction, "text");
   });
 
+  it("saves the photo with a photo scan", async () => {
+    const extraction = buildExample("cereal", "en");
+    analyzeLabel.mockResolvedValue(extraction);
+    const form = new FormData();
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46, 0x49, 0x46, 0, 1]);
+    form.set("image", new File([jpeg], "label.jpg"));
+
+    const res = await POST(post(form));
+    expect(res.status).toBe(200);
+    expect(insertScan).toHaveBeenCalledWith(extraction, "photo", {
+      userId: `user-${userCount}`,
+      mediaType: "image/jpeg",
+      base64: Buffer.from(jpeg).toString("base64"),
+    });
+  });
+
   it("requires a signed-in user", async () => {
     getCurrentUser.mockResolvedValue(null);
     const res = await POST(post(textForm()));

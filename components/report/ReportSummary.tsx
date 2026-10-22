@@ -10,15 +10,15 @@ import { basisKey, formatAmount, formatDate } from "./format";
 import { ReportFrame, type ReportData } from "./ReportFrame";
 import { ScoreRing } from "./ScoreRing";
 
-export function ReportSummary({ scan }: { scan: StoredScan }) {
+export function ReportSummary({ scan, photoUrl }: { scan: StoredScan; photoUrl: string | null }) {
   return (
     <ReportFrame scan={scan} backHref="/history">
-      {(data) => <Summary {...data} />}
+      {(data) => <Summary {...data} photoUrl={photoUrl} />}
     </ReportFrame>
   );
 }
 
-function Summary({ scan, assessment }: ReportData) {
+function Summary({ scan, assessment, photoUrl }: ReportData & { photoUrl: string | null }) {
   const { t, locale } = useI18n();
   const { extraction } = scan;
   const verdict = TONE_CLASSES[assessment.verdict];
@@ -45,12 +45,25 @@ function Summary({ scan, assessment }: ReportData) {
       <div className="grid gap-4 md:grid-cols-2">
         <section className="flex flex-col gap-4">
           <div className="flex items-center gap-3 rounded-2xl border-2 border-line bg-surface p-4">
-            <span
-              aria-hidden="true"
-              className={`flex size-12 shrink-0 items-center justify-center rounded-full font-display text-xl font-bold ${verdict.solid}`}
-            >
-              {extraction.productName.charAt(0).toUpperCase() || "?"}
-            </span>
+            {photoUrl ? (
+              <a
+                href={photoUrl}
+                target="_blank"
+                rel="noreferrer"
+                title={t("report.openPhoto")}
+                className="shrink-0 overflow-hidden rounded-xl border-2 border-line hover:border-brand"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL */}
+                <img src={photoUrl} alt={t("report.photoAlt")} className="size-20 object-cover" />
+              </a>
+            ) : (
+              <span
+                aria-hidden="true"
+                className={`flex size-12 shrink-0 items-center justify-center rounded-full font-display text-xl font-bold ${verdict.solid}`}
+              >
+                {extraction.productName.charAt(0).toUpperCase() || "?"}
+              </span>
+            )}
             <div className="min-w-0">
               <h1 className="font-display text-xl font-bold leading-tight">{extraction.productName}</h1>
               <p className="text-sm text-ink-muted">
