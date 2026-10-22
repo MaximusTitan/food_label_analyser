@@ -9,7 +9,7 @@ import type { Locale } from "@/lib/i18n/config";
 import type { ParsedInput } from "./upload";
 
 /** Vercel AI Gateway model id. Override with AI_MODEL to switch provider or model. */
-const DEFAULT_MODEL = "anthropic/claude-opus-5.5";
+const DEFAULT_MODEL = "anthropic/claude-sonnet-5.5";
 
 const LANGUAGE_NAME: Record<Locale, string> = { en: "English", hi: "Hindi" };
 

@@ -35,16 +35,16 @@ describe("analyzeLabel", () => {
 
     expect(result.productName).toBe("Choco Crunch Cereal");
     const call = generateText.mock.calls[0][0];
-    expect(call.model.modelId).toBe("anthropic/claude-opus-5.5");
+    expect(call.model.modelId).toBe("anthropic/claude-sonnet-5.5");
     expect(call.system).toContain("in Hindi");
     expect(call.messages[0].content[0].text).toContain("<label_text>\noats, sugar\n</label_text>");
   });
 
   it("lets AI_MODEL pick another gateway model", async () => {
-    vi.stubEnv("AI_MODEL", "anthropic/claude-sonnet-5.5");
+    vi.stubEnv("AI_MODEL", "anthropic/claude-opus-5.5");
     generateText.mockResolvedValue({ finishReason: "stop", output: buildExample("juice", "en") });
     await analyzeLabel(TEXT, "en");
-    expect(generateText.mock.calls[0][0].model.modelId).toBe("anthropic/claude-sonnet-5.5");
+    expect(generateText.mock.calls[0][0].model.modelId).toBe("anthropic/claude-opus-5.5");
   });
 
   it("sends photos as image file parts", async () => {

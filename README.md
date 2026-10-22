@@ -36,7 +36,7 @@ In the Supabase dashboard:
 
 ## How it works
 
-1. **Read** — `POST /api/analyze` sends the photo (downscaled in the browser) or typed text through the Vercel AI Gateway (AI SDK `generateText` with `Output.object`, default model `anthropic/claude-opus-5.5`, override with `AI_MODEL`) using the schema in `lib/analysis/schema.ts`. The model only *extracts* what is printed and writes plain-language explanations in the user's language.
+1. **Read** — `POST /api/analyze` sends the photo (downscaled in the browser) or typed text through the Vercel AI Gateway (AI SDK `generateText` with `Output.object`, default model `anthropic/claude-sonnet-5.5`, override with `AI_MODEL`) using the schema in `lib/analysis/schema.ts`. The model only *extracts* what is printed and writes plain-language explanations in the user's language.
 2. **Clean** — `lib/analysis/normalize.ts` bounds numbers, trims text, dedupes lists and derives salt from sodium.
 3. **Score** — `lib/analysis/score.ts` computes the score deterministically from UK FSA traffic-light thresholds (per 100 g, or per 100 ml for drinks), fibre, trans fat and flagged ingredients. The model never picks the score, so results are consistent and testable.
 4. **Keep** — the route saves the scan to the `scans` table as the signed-in user (`lib/server/scans.ts`); rows are re-validated whenever they are read.
