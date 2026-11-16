@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { NUTRITION_COLUMNS, type LabelExtraction, type ModelExtraction } from "@/lib/analysis/schema";
 import { buildExample } from "@/lib/examples";
 
 const { generateText } = vi.hoisted(() => ({ generateText: vi.fn() }));
@@ -13,6 +14,20 @@ const { NoObjectGeneratedError } = await import("ai");
 const { AnalyzeFailure, analyzeLabel } = await import("./analyze");
 
 const TEXT = { kind: "text", text: "oats, sugar" } as const;
+
+/** What the model would return for an example: only the printed nutrition values. */
+function modelOutput(extraction: LabelExtraction): ModelExtraction {
+  return {
+    ...extraction,
+    nutrition: Object.entries(extraction.nutrition).flatMap(([nutrient, amount]) =>
+      NUTRITION_COLUMNS.flatMap((column) =>
+        amount[column] === null
+          ? []
+          : [{ nutrient: nutrient as keyof LabelExtraction["nutrition"], column, value: amount[column] }],
+      ),
+    ),
+  };
+}
 
 async function failureCode(promise: Promise<unknown>) {
   const error = await promise.catch((e: unknown) => e);
@@ -30,10 +45,11 @@ describe("analyzeLabel", () => {
   afterEach(() => vi.unstubAllEnvs());
 
   it("calls the gateway with the default model and returns normalised output", async () => {
-    generateText.mockResolvedValue({ finishReason: "stop", output: buildExample("cereal", "en") });
+    generateText.mockResolvedValue({ finishReason: "stop", output: modelOutput(buildExample("cereal", "en")) });
     const result = await analyzeLabel(TEXT, "hi");
 
     expect(result.productName).toBe("Choco Crunch Cereal");
+    expect(result.nutrition).toEqual(buildExample("cereal", "en").nutrition);
     const call = generateText.mock.calls[0][0];
     expect(call.model.modelId).toBe("anthropic/claude-sonnet-5.5");
     expect(call.system).toContain("in Hindi");
@@ -42,13 +58,13 @@ describe("analyzeLabel", () => {
 
   it("lets AI_MODEL pick another gateway model", async () => {
     vi.stubEnv("AI_MODEL", "anthropic/claude-opus-5.5");
-    generateText.mockResolvedValue({ finishReason: "stop", output: buildExample("juice", "en") });
+    generateText.mockResolvedValue({ finishReason: "stop", output: modelOutput(buildExample("juice", "en")) });
     await analyzeLabel(TEXT, "en");
     expect(generateText.mock.calls[0][0].model.modelId).toBe("anthropic/claude-opus-5.5");
   });
 
   it("sends photos as image file parts", async () => {
-    generateText.mockResolvedValue({ finishReason: "stop", output: buildExample("juice", "en") });
+    generateText.mockResolvedValue({ finishReason: "stop", output: modelOutput(buildExample("juice", "en")) });
     await analyzeLabel({ kind: "image", mediaType: "image/png", base64: "AAAA" }, "en");
     expect(generateText.mock.calls[0][0].messages[0].content[0]).toEqual({
       type: "file",
@@ -64,7 +80,7 @@ describe("analyzeLabel", () => {
   });
 
   it("maps a content filter stop to refused", async () => {
-    generateText.mockResolvedValue({ finishReason: "content-filter", output: buildExample("juice", "en") });
+    generateText.mockResolvedValue({ finishReason: "content-filter", output: modelOutput(buildExample("juice", "en")) });
     expect(await failureCode(analyzeLabel(TEXT, "en"))).toBe("refused");
   });
 
@@ -90,7 +106,7 @@ describe("analyzeLabel", () => {
   it("rejects things that are not food labels", async () => {
     generateText.mockResolvedValue({
       finishReason: "stop",
-      output: { ...buildExample("juice", "en"), isFoodLabel: false },
+      output: { ...modelOutput(buildExample("juice", "en")), isFoodLabel: false },
     });
     expect(await failureCode(analyzeLabel(TEXT, "en"))).toBe("not_a_label");
   });

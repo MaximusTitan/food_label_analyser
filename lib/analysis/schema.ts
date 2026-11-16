@@ -30,6 +30,21 @@ export type IngredientTag = (typeof INGREDIENT_TAGS)[number];
 export const TONES = ["good", "moderate", "avoid"] as const;
 export type Tone = (typeof TONES)[number];
 
+export const NUTRITION_KEYS = [
+  "energyKcal",
+  "sugarG",
+  "fatG",
+  "saturatedFatG",
+  "transFatG",
+  "saltG",
+  "sodiumMg",
+  "fibreG",
+  "proteinG",
+] as const;
+export type NutritionKey = (typeof NUTRITION_KEYS)[number];
+
+export const NUTRITION_COLUMNS = ["per100", "perServing"] as const;
+
 /** A nutrient amount as printed on the label. Either column may be missing. */
 const amountSchema = z.object({
   per100: z.number().nullable(),
@@ -37,29 +52,13 @@ const amountSchema = z.object({
 });
 export type Amount = z.infer<typeof amountSchema>;
 
-/**
- * What the model extracts from a label. Kept free of numeric/length
- * constraints because structured outputs only support a JSON Schema subset;
- * `normalizeExtraction` enforces bounds afterwards.
- */
-export const labelExtractionSchema = z.object({
+const sharedFields = {
   isFoodLabel: z.boolean(),
   productName: z.string(),
   isDrink: z.boolean(),
   servingSize: z.object({
     description: z.string(),
     grams: z.number().nullable(),
-  }),
-  nutrition: z.object({
-    energyKcal: amountSchema,
-    sugarG: amountSchema,
-    fatG: amountSchema,
-    saturatedFatG: amountSchema,
-    transFatG: amountSchema,
-    saltG: amountSchema,
-    sodiumMg: amountSchema,
-    fibreG: amountSchema,
-    proteinG: amountSchema,
   }),
   ingredients: z.array(
     z.object({
@@ -77,9 +76,38 @@ export const labelExtractionSchema = z.object({
   risks: z.array(z.string()),
   whoShouldSkip: z.array(z.string()),
   healthierSwaps: z.array(z.string()),
+};
+
+/** A label's analysis as the app stores and shows it. */
+export const labelExtractionSchema = z.object({
+  ...sharedFields,
+  nutrition: z.object(
+    Object.fromEntries(NUTRITION_KEYS.map((key) => [key, amountSchema])) as Record<
+      NutritionKey,
+      typeof amountSchema
+    >,
+  ),
 });
 export type LabelExtraction = z.infer<typeof labelExtractionSchema>;
-export type NutritionKey = keyof LabelExtraction["nutrition"];
+
+/**
+ * What the model is asked to return. Nutrition is a list of only the values
+ * printed on the label rather than 18 nullable numbers: structured outputs cap
+ * how many nullable/union fields a schema may have (16 on Claude). Also kept
+ * free of numeric/length constraints, which structured outputs don't support;
+ * `normalizeExtraction` enforces bounds afterwards.
+ */
+export const modelExtractionSchema = z.object({
+  ...sharedFields,
+  nutrition: z.array(
+    z.object({
+      nutrient: z.enum(NUTRITION_KEYS),
+      column: z.enum(NUTRITION_COLUMNS),
+      value: z.number(),
+    }),
+  ),
+});
+export type ModelExtraction = z.infer<typeof modelExtractionSchema>;
 
 export const SCAN_SOURCES = ["photo", "text", "example"] as const;
 

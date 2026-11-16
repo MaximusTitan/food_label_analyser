@@ -1,4 +1,10 @@
-import type { Amount, LabelExtraction, NutritionKey } from "./schema";
+import {
+  NUTRITION_KEYS,
+  type Amount,
+  type LabelExtraction,
+  type ModelExtraction,
+  type NutritionKey,
+} from "./schema";
 
 const MAX_TEXT = 240;
 const MAX_NAME = 80;
@@ -56,6 +62,21 @@ function cleanAmount(amount: Amount, limit: number): Amount {
 
 function saltFromSodium(sodium: number | null): number | null {
   return sodium === null ? null : Math.round(sodium * SALT_PER_SODIUM_MG * 100) / 100;
+}
+
+/**
+ * Turns the model's list of printed nutrition values into the per-nutrient
+ * table the app stores. Values that weren't printed stay null; if the model
+ * repeats a nutrient/column pair, the first value wins.
+ */
+export function fromModelExtraction(raw: ModelExtraction): LabelExtraction {
+  const nutrition = Object.fromEntries(
+    NUTRITION_KEYS.map((key) => [key, { per100: null, perServing: null }]),
+  ) as LabelExtraction["nutrition"];
+  for (const { nutrient, column, value } of raw.nutrition) {
+    nutrition[nutrient][column] ??= value;
+  }
+  return { ...raw, nutrition };
 }
 
 /**

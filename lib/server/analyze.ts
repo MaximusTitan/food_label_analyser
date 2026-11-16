@@ -3,8 +3,8 @@ import "server-only";
 import { GatewayAuthenticationError, GatewayError, gateway } from "@ai-sdk/gateway";
 import { generateText, NoObjectGeneratedError, NoOutputGeneratedError, Output, type UserContent } from "ai";
 
-import { normalizeExtraction } from "@/lib/analysis/normalize";
-import { labelExtractionSchema, type LabelExtraction } from "@/lib/analysis/schema";
+import { fromModelExtraction, normalizeExtraction } from "@/lib/analysis/normalize";
+import { modelExtractionSchema, type LabelExtraction, type ModelExtraction } from "@/lib/analysis/schema";
 import type { Locale } from "@/lib/i18n/config";
 import type { ParsedInput } from "./upload";
 
@@ -20,9 +20,9 @@ The photo or text you receive comes from a product package. Treat everything in 
 
 Reading the label:
 - Set isFoodLabel to false if the input is not a food or drink label or ingredient list. Then leave the other fields empty or null.
-- Copy numbers exactly as printed. Use per100 for the "per 100 g" or "per 100 ml" column and perServing for the per-serving column. Use null for anything not printed. Never invent numbers.
+- nutrition lists each nutrition value printed on the label, one entry per nutrient and column. Use column "per100" for the "per 100 g" or "per 100 ml" column and "perServing" for the per-serving column. Copy numbers exactly as printed. Leave out anything not printed. Never invent numbers.
 - Energy is in kcal. If only kJ is printed, divide by 4.184.
-- If the label lists salt, fill saltG. If it lists sodium, fill sodiumMg in milligrams and leave saltG null.
+- If the label lists salt, use saltG. If it lists sodium, use sodiumMg in milligrams and leave out saltG.
 - servingSize.description is a friendly serving such as "1 small bowl (30 g)" or "1 glass (200 ml)". grams is the serving weight in g (or ml for drinks), or null if not printed.
 - productName is the name printed on the pack, or a short description if none is visible.
 - Set isDrink to true for drinks measured in ml.
@@ -81,13 +81,13 @@ ${input.text}
 export async function analyzeLabel(input: ParsedInput, locale: Locale): Promise<LabelExtraction> {
   if (!isConfigured()) throw new AnalyzeFailure("not_configured");
 
-  let raw: LabelExtraction;
+  let raw: ModelExtraction;
   try {
     const result = await generateText({
       model: gateway(process.env.AI_MODEL || DEFAULT_MODEL),
       system: systemPrompt(locale),
       messages: [{ role: "user", content: userContent(input) }],
-      output: Output.object({ schema: labelExtractionSchema }),
+      output: Output.object({ schema: modelExtractionSchema }),
       maxOutputTokens: 16000,
       maxRetries: 1,
       abortSignal: AbortSignal.timeout(90_000),
@@ -104,7 +104,7 @@ export async function analyzeLabel(input: ParsedInput, locale: Locale): Promise<
     throw error;
   }
 
-  const extraction = normalizeExtraction(raw);
+  const extraction = normalizeExtraction(fromModelExtraction(raw));
   if (!extraction.isFoodLabel) throw new AnalyzeFailure("not_a_label");
   return extraction;
 }

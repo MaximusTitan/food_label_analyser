@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildExample } from "@/lib/examples";
-import { normalizeExtraction } from "./normalize";
+import { fromModelExtraction, normalizeExtraction } from "./normalize";
 import type { LabelExtraction } from "./schema";
 
 function sample(): LabelExtraction {
@@ -62,5 +62,24 @@ describe("normalizeExtraction", () => {
     const raw = sample();
     raw.ingredients.push({ name: "   ", eNumber: null, tags: [], tone: "good", explanation: "" });
     expect(normalizeExtraction(raw).ingredients).toHaveLength(sample().ingredients.length);
+  });
+});
+
+describe("fromModelExtraction", () => {
+  it("fills printed values into the nutrition table and leaves the rest null", () => {
+    const rest = sample();
+    const out = fromModelExtraction({
+      ...rest,
+      nutrition: [
+        { nutrient: "sugarG", column: "per100", value: 30 },
+        { nutrient: "sugarG", column: "perServing", value: 9 },
+        { nutrient: "sugarG", column: "per100", value: 99 },
+        { nutrient: "sodiumMg", column: "per100", value: 400 },
+      ],
+    });
+    expect(out.nutrition.sugarG).toEqual({ per100: 30, perServing: 9 });
+    expect(out.nutrition.sodiumMg).toEqual({ per100: 400, perServing: null });
+    expect(out.nutrition.fatG).toEqual({ per100: null, perServing: null });
+    expect(out.productName).toBe(rest.productName);
   });
 });
